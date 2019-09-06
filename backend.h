@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QtDebug>
-#include "LynxStructure.h"
+#include "lynxstructure.h"
 #include "lynxuartqt.h"
 #include "lightcontrol.h"
 // #include "teststruct.h"
@@ -14,7 +14,7 @@ class BackEnd : public QObject
 
     Q_PROPERTY(int blueLight READ blueLight WRITE setBlueLight NOTIFY blueLightChanged)
     Q_PROPERTY(int orangeLight READ orangeLight WRITE setOrangeLight NOTIFY orangeLightChanged)
-    // Q_PROPERTY(bool uartConnected READ )
+    Q_PROPERTY(unsigned int transmitInterval READ transmitInterval WRITE setTransmitInterval NOTIFY transmitIntervalChanged)
 
     LynxManager _lynx;
     LynxUartQt _uart;
@@ -34,6 +34,7 @@ public:
 
     int blueLight() const { return _lightControl.blueLight; }
     int orangeLight() const { return _lightControl.orangeLight; }
+    unsigned int transmitInterval() const { return _lightControl.transmitInterval; }
 
     void setBlueLight(int input)
     {
@@ -67,11 +68,28 @@ public:
         emit orangeLightChanged();
     }
 
+    void setTransmitInterval(unsigned int input)
+    {
+        if (input == _lightControl.transmitInterval)
+            return;
+
+        _lightControl.transmitInterval = input;
+        _uart.send(_lightControl.transmitInterval.lynxId());
+
+        qDebug() << "";
+        qDebug() << "--------------- Sending ---------------";
+        qDebug() << "Transmit interval: " << _lightControl.transmitInterval;
+        qDebug() << "---------------------------------------";
+
+        emit transmitIntervalChanged();
+    }
+
 signals:
     void clearPortList();
     void addPort(const QString & portName);
     void blueLightChanged();
     void orangeLightChanged();
+    void transmitIntervalChanged();
 
 public slots:
     void sendData();

@@ -38,10 +38,10 @@ Window
                 width: parent.width/2
                 id: textField
                 placeholderText: qsTr("Input number")
-                validator: IntValidator { top: 255; bottom: 0 }
+                validator: IntValidator { top: 2147483647; bottom: 0 }
                 onAccepted:
                 {
-                    backEnd.orangeLight = text
+                    backEnd.transmitInterval = text
                     label.text = text;
                     text = qsTr("");
                 }

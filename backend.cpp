@@ -57,15 +57,16 @@ void BackEnd::readData()
         qDebug() << "Struct Index: " << _receiveInfo.lynxId.structIndex;
         qDebug() << "Variable Index: " << _receiveInfo.lynxId.variableIndex;
         qDebug() << "Length: " << _receiveInfo.dataLength;
-        qDebug() << "State: " << _receiveInfo.state;
-        qDebug() << "---------------------------------------";
-        qDebug() << "Blue light: " << _lightControl.blueLight;
-        qDebug() << "Orange light: " << _lightControl.orangeLight;
+        qDebug() << "State: " << lynsStateTextList[_receiveInfo.state];
         qDebug() << "---------------------------------------";
 
         if(_receiveInfo.state == eNewDataReceived)
         {
-            // do stuff
+            qDebug() << "Blue light: " << _lightControl.blueLight;
+            qDebug() << "Orange light: " << _lightControl.orangeLight;
+            qDebug() << "Time: " << _lightControl.time;
+            qDebug() << "Transmit interval" << _lightControl.transmitInterval;
+            qDebug() << "---------------------------------------";
         }
     }
 }
