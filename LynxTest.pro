@@ -38,7 +38,7 @@ HEADERS += \
     "../LynxStructure/lynxstructure.h" \
     "../LynxStructure/lynxiodevice.h" \
     "../LynxStructure/lynxuartqt.h" \
-    "../LynxStructure/teststruct.h" \
+    # "../LynxStructure/teststruct.h" \
     backend.h \
     lightcontrol.h
 

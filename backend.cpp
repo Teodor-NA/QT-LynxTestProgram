@@ -19,7 +19,7 @@ void BackEnd::sendData()
     qDebug() << "Orange light: " << _lightControl.orangeLight;
     qDebug() << "---------------------------------------";
 
-    _uart.send(_lightControl.lynxId);
+    _uart.send(_lightControl.lynxId());
 }
 
 void BackEnd::readData()
