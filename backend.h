@@ -19,6 +19,7 @@ class BackEnd : public QObject
     LynxManager _lynx;
     LynxUartQt _uart;
 
+    LightControl _lightControl_2;
     LightControl _lightControl;
 
     LynxInfo _receiveInfo;

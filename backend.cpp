@@ -4,6 +4,7 @@ BackEnd::BackEnd(QObject *parent) :
     QObject(parent),
     _lynx(0x25),
     _uart(_lynx),
+    _lightControl_2(_lynx, 0x30),
     _lightControl(_lynx, 0x15)
 {
    //  _uart.open(4, 115200);
@@ -15,11 +16,12 @@ void BackEnd::sendData()
 {
     qDebug() << "";
     qDebug() << "--------------- Sending ---------------";
-    qDebug() << "Blue light: " << _lightControl.blueLight;
-    qDebug() << "Orange light: " << _lightControl.orangeLight;
+    qDebug() << "Struct Id: 0x" << LynxString::number(_lynx.structId(_lightControl_2.lynxId()), 16);
+    qDebug() << "Blue light: " << _lightControl_2.blueLight;
+    qDebug() << "Orange light: " << _lightControl_2.orangeLight;
     qDebug() << "---------------------------------------";
 
-    _uart.send(_lightControl.lynxId());
+    _uart.send(_lightControl_2.lynxId());
 }
 
 void BackEnd::readData()
@@ -57,7 +59,7 @@ void BackEnd::readData()
         qDebug() << "Struct Index: " << _receiveInfo.lynxId.structIndex;
         qDebug() << "Variable Index: " << _receiveInfo.lynxId.variableIndex;
         qDebug() << "Length: " << _receiveInfo.dataLength;
-        qDebug() << "State: " << lynsStateTextList[_receiveInfo.state];
+        qDebug() << "State: " << lynxStateTextList[_receiveInfo.state];
         qDebug() << "---------------------------------------";
 
         if(_receiveInfo.state == eNewDataReceived)
@@ -65,7 +67,8 @@ void BackEnd::readData()
             qDebug() << "Blue light: " << _lightControl.blueLight;
             qDebug() << "Orange light: " << _lightControl.orangeLight;
             qDebug() << "Time: " << _lightControl.time;
-            qDebug() << "Transmit interval" << _lightControl.transmitInterval;
+            qDebug() << "Transmit interval: " << _lightControl.transmitInterval;
+            qDebug() << "Remote state: " << LynxString(_lightControl.state);
             qDebug() << "---------------------------------------";
         }
     }

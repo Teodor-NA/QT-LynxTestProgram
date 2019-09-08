@@ -12,11 +12,8 @@ struct LightControl
         blueLight(lynx, _lynxId),
         orangeLight(lynx, _lynxId),
         time(lynx, _lynxId),
-        transmitInterval(lynx, _lynxId)
-        // blueLight(lynx.addVariable(lynxId, eUint8)),
-        // orangeLight(lynx.addVariable(lynxId, eUint8)),
-        // time(lynx.addVariable(lynxId, eUint32)),
-        // transmitInterval(lynx.addVariable(lynxId, eUint32))
+        transmitInterval(lynx, _lynxId),
+        state(lynx, _lynxId)
     {}
 
     LYNX_STRUCTURE_MACRO
@@ -25,6 +22,7 @@ struct LightControl
 	LynxVar_u8 orangeLight;
     LynxVar_u32 time;
     LynxVar_u32 transmitInterval;
+    LynxVar_string state;
 };
 
 #endif // !LIGHT_CONTROL_H
