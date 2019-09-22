@@ -1,187 +1,378 @@
-import QtQuick 2.7
-import QtQuick.Window 2.2
+import QtQuick 2.12
+import QtQuick.Window 2.12
 import backend 1.1
-import QtQuick.Controls 1.6
+import QtQuick.Controls 2.12
 
 
 Window
 {
     visible: true
-    width: 640
-    height: 480
+    width: 1280
+    height: 720
+    minimumWidth: 800
+    minimumHeight: 400
     title: qsTr("Lynx Test App")
+    onWidthChanged: console.log("Width: " + width)
+    onHeightChanged: console.log("Height: " + height)
 
     BackEnd
     {
         id: backEnd
+//        orangeLight: orangeSlider.value
+//        blueLight: blueSlider.value
         onClearPortList:
         {
             portListModel.clear()
             portListModel.append({ text: qsTr("Select port") })
         }
         onAddPort: portListModel.append({ text: portName })
+        onClearDevices:
+        {
+            deviceListModel.clear()
+            deviceListModel.append({ text: qsTr("No selection") })
+            deviceComboBox.currentIndex = 0
+        }
+        onAddDevice: deviceListModel.append({ text: device })
+        onAddDeviceInfo:
+        {
+            deviceDescriptionLabel.second = description
+            deviceIdLabel.second = id
+            lynxVersionLabel.second = version
+            structCountLabel.second = count
+        }
+
+        onClearStructList:
+        {
+            structListModel.clear()
+            structListModel.append({ text: qsTr("No selection") })
+            structComboBox.currentIndex = 0
+        }
+        onAddStruct: structListModel.append({ text: structInfo })
+        onAddStructInfo:
+        {
+            // const QString & description, const QString & id, const QString & count
+            structDescriptionLabel.second = description
+            structIdLabel.second = id
+            variableCountLabel.second = count
+        }
+
+        onClearVariableList: variableModel.clear()
+        onAddVarable: variableModel.append({ description: description, varIndex: index, dataType: type })
     }
 
-    Column
+    Row
     {
         spacing: 10
-        padding: 20
-        width: 200
+        padding: 10
+        anchors.fill: parent
 
-        Row
+        Column
         {
-            width: parent.width
             spacing: 10
+            // padding: 20
+            width: parent.width/2 - parent.spacing - parent.padding
 
-            TextField
-            {
-                width: parent.width/2
-                id: textField
-                placeholderText: qsTr("Input number")
-                validator: IntValidator { top: 2147483647; bottom: 0 }
-                onAccepted:
-                {
-                    backEnd.transmitInterval = text
-                    label.text = text;
-                    text = qsTr("");
-                }
-            }
-
-            Label
-            {
-                width: parent.width/2
-                id: label
-                text: qsTr("Not set")
-            }
-
-            Column
-            {
-                spacing: 10
-
-                Row
-                {
-                    spacing: 5
-
-                    Slider
-                    {
-                        id: blueSlider
-
-                        width: 200
-                        minimumValue: 0
-                        maximumValue: 255
-
-                        onValueChanged:
-                        {
-                            backEnd.blueLight = value
-                        }
-                    }
-
-                    Label
-                    {
-                        id: blueLabel
-                        text: Math.floor(blueSlider.value)
-                    }
-                }
-                Row
-                {
-                    spacing: 5
-
-                    Slider
-                    {
-                        id: orangeSlider
-
-                        width: 200
-                        minimumValue: 0
-                        maximumValue: 255
-
-                        onValueChanged:
-                        {
-                            backEnd.orangeLight = value
-                        }
-                    }
-
-                    Label
-                    {
-                        id: orangeLabel
-                        text: Math.floor(orangeSlider.value)
-                    }
-                }
-            }
-        }
-
-
-
-        Button
-        {
-            width: parent.width
-            id: button
-            text: qsTr("Send all")
-            onClicked: backEnd.sendData()
-        }
-
-        Row
-        {
-            spacing: 5
-
-            ComboBox
+/*
+            Row
             {
                 width: 200
-                id: portComboBox
-                // currentIndex: -1
-                model:
-                    ListModel
-                    {
-                        id: portListModel
-                        ListElement{text: qsTr("Select port")}
-                    }
+                spacing: 10
 
-                onActivated:
+                TextField
                 {
-                    // console.log("Activated")
-                    if (currentIndex > 0)
+                    width: parent.width/2
+                    id: textField
+                    placeholderText: qsTr("Input number")
+                    validator: IntValidator { top: 2147483647; bottom: 0 }
+                    onAccepted:
                     {
-                        backEnd.portSelected(portComboBox.currentIndex - 1)
-                        connectButton.enabled = true
+                        backEnd.transmitInterval = text
+                        label.text = text;
+                        text = qsTr("");
                     }
-                    else
-                        connectButton.enabled = false
                 }
 
-                onPressedChanged:
+                Label
                 {
-                    if (pressed)
+                    width: parent.width/2
+                    id: label
+                    text: qsTr("Not set")
+                }
+
+                Column
+                {
+                    spacing: 10
+
+                    Row
                     {
-                        backEnd.refreshPortList()
-                        if (portListModel.count < 2)
-                            connectButton.enabled = false
-                        // console.log("Pressed")
+                        spacing: 5
+
+                        Slider
+                        {
+                            id: blueSlider
+
+                            width: 200
+                            from: 0
+                            to: 255
+                      }
+
+                        Label
+                        {
+                            id: blueLabel
+                            text: Math.floor(blueSlider.value)
+                        }
+                    }
+                    Row
+                    {
+                        spacing: 5
+
+                        Slider
+                        {
+                            id: orangeSlider
+
+                            width: 200
+                            from: 0
+                            to: 255
+                        }
+
+                        Label
+                        {
+                            id: orangeLabel
+                            text: Math.floor(orangeSlider.value)
+                        }
                     }
                 }
             }
+
+*/
+
+            Row
+            {
+                width: parent.width
+                spacing: 10
+
+                ComboBox
+                {
+                    width: parent.width*2/3 - parent.spacing
+                    id: portComboBox
+                    font.pixelSize: 15
+                    model:
+                        ListModel
+                        {
+                            id: portListModel
+                            ListElement{text: qsTr("Select port")}
+                        }
+
+                    onActivated:
+                    {
+                        // console.log("Activated")
+                        if (currentIndex > 0)
+                        {
+                            backEnd.portSelected(portComboBox.currentIndex - 1)
+                            connectButton.enabled = true
+                        }
+                        else
+                            connectButton.enabled = false
+                    }
+
+                    onPressedChanged:
+                    {
+                        if (pressed)
+                        {
+                            backEnd.refreshPortList()
+                            if (portListModel.count < 2)
+                                connectButton.enabled = false
+                            // console.log("Pressed")
+                        }
+                    }
+                }
+
+                Button
+                {
+                    width: parent.width*1/3
+                    id: connectButton
+                    enabled: false
+                    text: qsTr("Connect")
+                    font.pixelSize: 15
+                    onClicked:
+                    {
+                        backEnd.connectButtonClicked()
+                        if (backEnd.uartConnected())
+                        {
+                            text = qsTr("Disconnect")
+                            portComboBox.enabled = false
+                        }
+                        else
+                        {
+                            text = qsTr("Connect")
+                            portComboBox.enabled = true
+                        }
+                    }
+                }
+            }
+
 
             Button
             {
-                width: 100
-                id: connectButton
-                enabled: false
-                text: qsTr("Connect")
-                onClicked:
+                width: parent.width
+                text: qsTr("Scan")
+                font.pixelSize: 15
+                onClicked: backEnd.scan()
+            }
+
+            ComboBox
+            {
+                id: deviceComboBox
+                width: parent.width
+                font.pixelSize: 15
+                model:
+                    ListModel
+                    {
+                        id: deviceListModel
+                        ListElement { text: qsTr("No selection") }
+                    }
+                onCurrentIndexChanged: backEnd.selectDevice(currentIndex)
+
+            }
+
+            Frame
+            {
+                width: parent.width
+                height: 100
+
+                Column
                 {
-                    backEnd.connectButtonClicked()
-                    if (backEnd.uartConnected())
+                    spacing: 2
+                    anchors.centerIn: parent
+
+                    LabelInfo
                     {
-                        text = qsTr("Disconnect")
-                        portComboBox.enabled = false
+                        id: deviceDescriptionLabel
+                        first: "Device Description"
+                        second: "No selection"
                     }
-                    else
+                    LabelInfo
                     {
-                        text = qsTr("Connect")
-                        portComboBox.enabled = true
+                        id: deviceIdLabel
+                        first: "Device Id"
+                        second: "No selection"
                     }
+                    LabelInfo
+                    {
+                        id: lynxVersionLabel
+                        first: "Lynx Version"
+                        second: "No selection"
+                    }
+                    LabelInfo
+                    {
+                        id: structCountLabel
+                        first: "Struct Count"
+                        second: "No selection"
+                    }
+                }
+            }
+
+            ComboBox
+            {
+                id: structComboBox
+                width: parent.width
+                font.pixelSize: 15
+                model:
+                    ListModel
+                    {
+                        id: structListModel
+                        ListElement { text: qsTr("No selection") }
+                    }
+                onCurrentIndexChanged: backEnd.selectStruct(currentIndex)
+            }
+
+            Frame
+            {
+                width: parent.width
+                height: 70
+
+                Column
+                {
+                    spacing: 2
+                    anchors.centerIn: parent
+                    LabelInfo
+                    {
+                        id: structDescriptionLabel
+                        first: "Struct Description"
+                        second: "No selection"
+                    }
+                    LabelInfo
+                    {
+                        id: structIdLabel
+                        first: "Struct Id"
+                        second: "No selection"
+                    }
+                    LabelInfo
+                    {
+                        id: variableCountLabel
+                        first: "Variable Count"
+                        second: "No selection"
+                    }
+                }
+            }
+
+            ListView
+            {
+                id: variableListView
+                width: parent.width
+                model:
+                    ListModel
+                    {
+                        id: variableListModel
+                        ListElement { text: qsTr("No selection") }
+                    }
+            }
+
+        }
+
+
+        Frame
+        {
+            width: parent.width/2 - parent.padding
+            height: parent.height - 20
+
+            ScrollView
+            {
+                width: parent.width - 20
+                height: parent.height - 20
+                anchors.centerIn: parent
+                clip: true
+
+                ListView
+                {
+                    spacing: 2
+                    anchors.fill: parent
+                    model: VariableModel { id: variableModel }
+                    delegate: variableDelegate
                 }
             }
         }
     }
 
+    Component
+    {
+        id: variableDelegate
 
+        Frame
+        {
+            width: parent.width
+            height: 70
+
+            Column
+            {
+                anchors.centerIn: parent
+                spacing: 2
+                LabelInfo { first: qsTr("Description"); second: description }
+                LabelInfo { first: qsTr("Variable Index"); second: varIndex }
+                LabelInfo { first: qsTr("Data type"); second: dataType }
+            }
+        }
+    }
 }
+
+

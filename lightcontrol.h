@@ -3,8 +3,6 @@
 
 #include "lynxstructure.h"
 
-using namespace LynxLib;
-
 struct LightControl
 {
 	LightControl(LynxManager & lynx, char _structId) :

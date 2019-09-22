@@ -18,6 +18,7 @@ SOURCES += \
         "../LynxStructure/lynxiodevice.cpp" \
         "../LynxStructure/lynxstructure.cpp" \
         "../LynxStructure/lynxuartqt.cpp" \
+        "../LynxStructure/lynxlistclasses.cpp" \
         backend.cpp \
         main.cpp
 
@@ -38,6 +39,7 @@ HEADERS += \
     "../LynxStructure/lynxstructure.h" \
     "../LynxStructure/lynxiodevice.h" \
     "../LynxStructure/lynxuartqt.h" \
+    "../LynxStructure/lynxlistclasses.h" \
     # "../LynxStructure/teststruct.h" \
     backend.h \
     lightcontrol.h
