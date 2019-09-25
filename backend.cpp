@@ -3,9 +3,7 @@
 BackEnd::BackEnd(QObject *parent) :
     QObject(parent),
     _lynx(0x25, "Device 1"),
-    _uart(_lynx),
-    _lightControl_2(_lynx, 0x30),
-    _lightControl(_lynx, 0x15)
+    _uart(_lynx)
 {
    //  _uart.open(4, 115200);
 
@@ -41,12 +39,75 @@ void BackEnd::readData()
 
         if(_receiveInfo.state == LynxLib::eNewDataReceived)
         {
-            qDebug() << "Blue light: " << _lightControl.blueLight;
-            qDebug() << "Orange light: " << _lightControl.orangeLight;
-            qDebug() << "Time: " << _lightControl.time;
-            qDebug() << "Transmit interval: " << _lightControl.transmitInterval;
-            qDebug() << "Remote state: " << LynxString(_lightControl.state);
-            qDebug() << "---------------------------------------";
+            int deviceIndex = -1;
+
+            for (int i = 0; i < _deviceInfoList.count(); i++)
+            {
+                if (_deviceInfoList.at(i).deviceId == _receiveInfo.deviceId)
+                {
+                    deviceIndex = i;
+                    break;
+                }
+            }
+
+            if (deviceIndex < 0)
+            {
+                qDebug() << "Could not find device";
+                return;
+            }
+
+            int structIndex = -1;
+
+            for (int i = 0; i < _deviceInfoList.at(deviceIndex).structs.count(); i++)
+            {
+                if (_deviceInfoList.at(deviceIndex).structs.at(i).structId == _receiveInfo.structId)
+                {
+                    structIndex = i;
+                    break;
+                }
+            }
+
+            if (structIndex < 0)
+            {
+                qDebug() << "Could not find struct";
+                return;
+            }
+
+            int dynStructIndex = -1;
+
+            for (int i = 0; i < _addedStructs.count(); i++)
+            {
+                if ((deviceIndex == _addedStructs.at(i).deviceIndex) && (structIndex == _addedStructs.at(i).structIndex))
+                {
+                    dynStructIndex = i;
+                    break;
+                }
+            }
+
+            if (dynStructIndex < 0)
+            {
+                qDebug() << "Dynamic struct not found";
+                return;
+            }
+
+            qDebug() << "-------------- Variables --------------";
+            for (int i = 0; i < _deviceInfoList.at(deviceIndex).structs.at(structIndex).variables.count(); i++)
+            {
+                qDebug() << (QString(_deviceInfoList.at(deviceIndex).structs.at(structIndex).variables.at(i).description) + ":") <<
+                           _lynx.getValue(_dynamicIds.at(dynStructIndex).variableIds.at(i));
+
+            }
+            qDebug()<< "---------------------------------------";
+
+
+            if ((deviceIndex == _selectedDevice) && (structIndex == _selectedStruct))
+            {
+                for (int i = 0; i < _dynamicIds.at(dynStructIndex).variableIds.count(); i++)
+                {
+                    this->addVariableValue(i, _lynx.getValue(_dynamicIds.at(dynStructIndex).variableIds.at(i)));
+                }
+            }
+
         }
         else if (_receiveInfo.state == LynxLib::eNewDeviceInfoReceived)
         {
@@ -178,5 +239,85 @@ void BackEnd::selectStruct(int index)
             );
         }
     }
+
+}
+
+int BackEnd::generateStruct()
+{
+    qDebug() << "Attempting to add struct with device index:" << _selectedDevice << "and struct index:" <<_selectedStruct;
+
+    if ((_selectedDevice < 0) || (_selectedDevice >= _deviceInfoList.count()))
+    {
+        qDebug() << "Could not add struct because device index is out of range";
+        return -1;
+    }
+    else if ((_selectedStruct < 0) || (_selectedStruct >= _deviceInfoList.at(_selectedDevice).structs.count()))
+    {
+        qDebug() << "Could not add struct because struct index is out of range";
+        return -1;
+    }
+
+    LynxDynamicId temp = _lynx.addStructure(_deviceInfoList.at(_selectedDevice).structs.at(_selectedStruct));
+
+    if (temp.structId == LynxId())
+    {
+        qDebug() << "Struct could not be added (most likely because a struct wth that name or id already exists)";
+        return -1;
+    }
+
+    _dynamicIds.append(temp);
+    _addedStructs.append();
+    _addedStructs.last().deviceIndex = _selectedDevice;
+    _addedStructs.last().structIndex = _selectedStruct;
+
+    qDebug() << "Struct was succesfully added, new index:" << (_dynamicIds.count() - 1);
+
+    return (_dynamicIds.count() - 1);
+}
+
+void BackEnd::pullStruct()
+{
+    for (int i = 0; i < _addedStructs.count(); i++)
+    {
+        if ((_addedStructs.at(i).deviceIndex == _selectedDevice) && (_addedStructs.at(i).structIndex == _selectedStruct))
+        {
+            qDebug() << "Pulling datagram";
+            _uart.pullDatagram(_dynamicIds.at(i).structId);
+            return;
+        }
+    }
+
+    qDebug() << "Could not find datagram. Did you remember to add the struct?";
+}
+
+void BackEnd::startPeriodic(unsigned int interval)
+{
+    for (int i = 0; i < _addedStructs.count(); i++)
+    {
+        if ((_addedStructs.at(i).deviceIndex == _selectedDevice) && (_addedStructs.at(i).structIndex == _selectedStruct))
+        {
+            qDebug() << "Starting periodic transmit at:" << interval << "ms interval";
+            _uart.remotePeriodicStart(_dynamicIds.at(i).structId, interval);
+            return;
+        }
+    }
+
+    qDebug() << "Could not find datagram. Did you remember to add the struct?";
+
+}
+
+void BackEnd::stopPeriodic()
+{
+    for (int i = 0; i < _addedStructs.count(); i++)
+    {
+        if ((_addedStructs.at(i).deviceIndex == _selectedDevice) && (_addedStructs.at(i).structIndex == _selectedStruct))
+        {
+            qDebug() << "Stopping periodic transmit";
+            _uart.remotePeriodicStop(_dynamicIds.at(i).structId);
+            return;
+        }
+    }
+
+    qDebug() << "Could not find datagram. Did you remember to add the struct?";
 
 }

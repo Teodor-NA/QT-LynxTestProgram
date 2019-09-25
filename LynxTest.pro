@@ -41,8 +41,7 @@ HEADERS += \
     "../LynxStructure/lynxuartqt.h" \
     "../LynxStructure/lynxlistclasses.h" \
     # "../LynxStructure/teststruct.h" \
-    backend.h \
-    lightcontrol.h
+    backend.h
 
 INCLUDEPATH += \
     "..\LynxStructure"

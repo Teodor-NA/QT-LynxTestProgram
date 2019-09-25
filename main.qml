@@ -12,8 +12,8 @@ Window
     minimumWidth: 800
     minimumHeight: 400
     title: qsTr("Lynx Test App")
-    onWidthChanged: console.log("Width: " + width)
-    onHeightChanged: console.log("Height: " + height)
+    // onWidthChanged: console.log("Width: " + width)
+    // onHeightChanged: console.log("Height: " + height)
 
     BackEnd
     {
@@ -58,6 +58,16 @@ Window
 
         onClearVariableList: variableModel.clear()
         onAddVarable: variableModel.append({ description: description, varIndex: index, dataType: type })
+        onAddVariableValue:
+        {
+            if ((variableIndex < 0) || (variableIndex >= variableModel.count))
+            {
+                console.log("Variable out of bounds. Index: " + variableIndex + ". Min index: 0. Max index: " + variableModel.count)
+                return
+            }
+
+            variableModel.setProperty(variableIndex, "value", value)
+        }
     }
 
     Row
@@ -214,6 +224,7 @@ Window
 
             Button
             {
+                id: scanButton
                 width: parent.width
                 text: qsTr("Scan")
                 font.pixelSize: 15
@@ -284,6 +295,56 @@ Window
                         ListElement { text: qsTr("No selection") }
                     }
                 onCurrentIndexChanged: backEnd.selectStruct(currentIndex)
+            }
+
+            Button{
+                id: addStructButton
+                width: parent.width
+                text: qsTr("Add struct")
+                font.pixelSize: 15
+                enabled: (structComboBox.currentIndex > 0)
+                onClicked:
+                {
+                    backEnd.generateStruct()
+                }
+            }
+
+            Button{
+                id: pullStructButton
+                width: parent.width
+                text: qsTr("Pull struct")
+                font.pixelSize: 15
+                onClicked: backEnd.pullStruct()
+            }
+
+            Row{
+                spacing: 10
+                width: parent.width
+
+                TextField{
+                    id: timerInput
+                    width: parent.width*1/3 - parent.spacing
+                    placeholderText: qsTr("Input time")
+                    font.pixelSize: 15
+                    validator: IntValidator {bottom: 0; top: 2147483647;}
+                }
+
+                Button{
+                    id: timerStartButton
+                    width: parent.width*1/3 - parent.spacing
+                    text: qsTr("Start periodic")
+                    font.pixelSize: 15
+                    enabled: timerInput.acceptableInput
+                    onClicked: backEnd.startPeriodic(timerInput.text)
+                }
+
+                Button{
+                    id: timerStopButton
+                    width: parent.width*1/3
+                    text: qsTr("Stop periodic")
+                    font.pixelSize: 15
+                    onClicked: backEnd.stopPeriodic()
+                }
             }
 
             Frame
@@ -361,7 +422,7 @@ Window
         Frame
         {
             width: parent.width
-            height: 70
+            height: 90
 
             Column
             {
@@ -370,6 +431,7 @@ Window
                 LabelInfo { first: qsTr("Description"); second: description }
                 LabelInfo { first: qsTr("Variable Index"); second: varIndex }
                 LabelInfo { first: qsTr("Data type"); second: dataType }
+                LabelInfo { first: qsTr("Value"); second: value }
             }
         }
     }

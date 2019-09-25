@@ -7,5 +7,6 @@ ListModel
         description: "Description"
         varIndex: "Index"
         dataType: "Data type"
+        value: 0
     }
 }
