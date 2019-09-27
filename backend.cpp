@@ -277,47 +277,80 @@ int BackEnd::generateStruct()
 
 void BackEnd::pullStruct()
 {
-    for (int i = 0; i < _addedStructs.count(); i++)
+    LynxId tmpId = this->findStructId();
+
+    if (tmpId.structIndex < 0)
     {
-        if ((_addedStructs.at(i).deviceIndex == _selectedDevice) && (_addedStructs.at(i).structIndex == _selectedStruct))
-        {
-            qDebug() << "Pulling datagram";
-            _uart.pullDatagram(_dynamicIds.at(i).structId);
-            return;
-        }
+        qDebug() << "Could not find datagram. Did you remember to add the struct?";
+        return;
     }
 
-    qDebug() << "Could not find datagram. Did you remember to add the struct?";
+    qDebug() << "Pulling datagram";
+    _uart.pullDatagram(tmpId);
 }
 
 void BackEnd::startPeriodic(unsigned int interval)
 {
-    for (int i = 0; i < _addedStructs.count(); i++)
+    LynxId tmpId = this->findStructId();
+
+    if (tmpId.structIndex < 0)
     {
-        if ((_addedStructs.at(i).deviceIndex == _selectedDevice) && (_addedStructs.at(i).structIndex == _selectedStruct))
-        {
-            qDebug() << "Starting periodic transmit at:" << interval << "ms interval";
-            _uart.remotePeriodicStart(_dynamicIds.at(i).structId, interval);
-            return;
-        }
+        qDebug() << "Could not find datagram. Did you remember to add the struct?";
+        return;
     }
 
-    qDebug() << "Could not find datagram. Did you remember to add the struct?";
-
+    qDebug() << "Starting periodic transmit at:" << interval << "ms interval";
+    _uart.remotePeriodicStart(tmpId, interval);
 }
 
 void BackEnd::stopPeriodic()
+{
+    LynxId tmpId = this->findStructId();
+
+    if (tmpId.structIndex < 0)
+    {
+        qDebug() << "Could not find datagram. Did you remember to add the struct?";
+        return;
+    }
+
+    qDebug() << "Stopping periodic transmit";
+    _uart.remotePeriodicStop(tmpId);
+}
+
+void BackEnd::sendVariable(int variableIndex, double value)
+{
+    LynxId tmpId = this->findStructId(variableIndex);
+
+    if (tmpId.structIndex < 0)
+    {
+        qDebug() << "Could not find datagram. Did you remember to add the struct?";
+        return;
+    }
+
+    qDebug() << QString::asprintf(
+                    "Sending value %f to target '%s'",
+                    value,
+                    _deviceInfoList.at(_selectedDevice).structs.at(_selectedStruct).variables.at(variableIndex).description.toCharArray()
+                    );
+    _lynx.setValue(value, tmpId);
+    _uart.send(tmpId);
+}
+
+
+LynxId BackEnd::findStructId(int variableIndex)
 {
     for (int i = 0; i < _addedStructs.count(); i++)
     {
         if ((_addedStructs.at(i).deviceIndex == _selectedDevice) && (_addedStructs.at(i).structIndex == _selectedStruct))
         {
-            qDebug() << "Stopping periodic transmit";
-            _uart.remotePeriodicStop(_dynamicIds.at(i).structId);
-            return;
+            if (variableIndex < 0)
+                return _dynamicIds.at(i).structId;
+            else if(variableIndex < _dynamicIds.at(i).variableIds.count())
+                return _dynamicIds.at(i).variableIds.at(variableIndex);
+            else
+                break;
         }
     }
 
-    qDebug() << "Could not find datagram. Did you remember to add the struct?";
-
+    return LynxId();
 }

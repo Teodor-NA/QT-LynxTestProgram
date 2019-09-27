@@ -57,7 +57,7 @@ Window
         }
 
         onClearVariableList: variableModel.clear()
-        onAddVarable: variableModel.append({ description: description, varIndex: index, dataType: type })
+        onAddVarable: variableModel.append( { description: description, varIndex: index, dataType: type })
         onAddVariableValue:
         {
             if ((variableIndex < 0) || (variableIndex >= variableModel.count))
@@ -377,17 +377,17 @@ Window
                 }
             }
 
-            ListView
-            {
-                id: variableListView
-                width: parent.width
-                model:
-                    ListModel
-                    {
-                        id: variableListModel
-                        ListElement { text: qsTr("No selection") }
-                    }
-            }
+            // ListView
+            // {
+            //     id: variableListView
+            //     width: parent.width
+            //     model:
+            //         ListModel
+            //         {
+            //             id: variableListModel
+            //             ListElement { text: qsTr("No selection") }
+            //         }
+            // }
 
         }
 
@@ -431,7 +431,14 @@ Window
                 LabelInfo { first: qsTr("Description"); second: description }
                 LabelInfo { first: qsTr("Variable Index"); second: varIndex }
                 LabelInfo { first: qsTr("Data type"); second: dataType }
-                LabelInfo { first: qsTr("Value"); second: value }
+                LabelInfo
+                {
+                    index: parseInt(varIndex)
+                    first: qsTr("Value");
+                    second: value
+                    enableInput: true
+                    onAccepted: backEnd.sendVariable(index, second) // console.log("Accepted" + index)
+                }
             }
         }
     }

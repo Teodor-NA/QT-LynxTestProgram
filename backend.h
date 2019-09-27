@@ -36,6 +36,8 @@ class BackEnd : public QObject
     LynxList<LynxDynamicId> _dynamicIds;
     LynxList<AddedStruct> _addedStructs;
 
+    LynxId findStructId(int variableIndex = -1);
+
 public:
     explicit BackEnd(QObject *parent = nullptr);
     ~BackEnd() { _uart.close(); }
@@ -66,6 +68,7 @@ public slots:
     void pullStruct();
     void startPeriodic(unsigned int interval);
     void stopPeriodic();
+    void sendVariable(int variableIndex, double value);
 };
 
 #endif // BACKEND_H
